@@ -1,4 +1,4 @@
-# Santander-Customer-Transaction-Prediction
+# Santander Customer Transaction Prediction
 This is from Kaggle Featured Prediction Competition. Here is the link: https://www.kaggle.com/c/santander-customer-transaction-prediction
 
 In this challenge, Santander invites Kagglers to help them identify which customers will make a specific transaction in the future, irrespective of the amount of money transacted. The data provided for this competition has the same structure as the real data they have available to solve this problem. To protect the privacy, the given data doesn't have a real column name. All columnes name looks like ID_code, target, var_0, var_1 and so on.

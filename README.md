@@ -9,16 +9,20 @@ To solve this problem, I did following four steps: clean the data, build up mode
 There are 200,000 samples in the test dataset. For each sample, we have 200 features named from var_0 to var_199, one binary target, and one ID_code. There are no missing values in the dataset. So I only removed the columne ID_code. I noticed that the target is unbalanced, 10% is 1 and 90% is 0. Also, the correlation coefficient matrix told us the features are independent with each other.
 
 ## Build up Models 
-I build up models by boosting algorithms: xgboost, lgbm and catboost. I chose the parameters by Bayesian Optimization. 
-### xgboost
+I build up models by boosting algorithms: XGBoost, LightGBM and CatBoost. I chose the parameters by Bayesian Optimization. 
+To be honest, I am not an expert on those boosting algorithms. But here are very brief introduction for beginners. Let me know if I made any mistake. 
 
-### lgbm
+![Screenshot](boostinghistory.png)
 
-### Catboost
+| Algorithm Name| Brief Introdcution  |
+| ------------- | ----------------------   |
+| XGBoost       |XGBoost used a more regularized model formalization to control over-fitting, which gives it better performance.|
+| LightGBM      | LightGBM is faster than XGBoost. And the accuracy in this project is higher than XGBoost. It has low memory usage.          |
+| CatBoost      | Designed for categorical data.           |
 
 ### Bayesian Optimization
 
-
+### Others
 I also tried other interesting approaches: time analysis with prophet and uber ludwig. I didn't post code for those two. But here are some introduction for people who are interest.
 
 ### time analysis
@@ -34,5 +38,5 @@ Aim to multiply features.
 | Algorithm Name | Cross-Validation Score | Leaderboard Score| Running time |
 | ------------- | ----------------------  |----------------- |------------- |
 | XGBoost       | Content Cell            |Content Cell      |Content Cell  |
+| LightGBM      | Content Cell            |Content Cell      |Content Cell  |
 | CatBoost      | Content Cell            |Content Cell      |Content Cell  |
-| LGBoost       |   Content Cell          |Content Cell      |Content Cell  |

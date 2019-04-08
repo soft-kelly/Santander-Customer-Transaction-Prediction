@@ -20,7 +20,6 @@ To be honest, I am not an expert on those boosting algorithms. But here are very
 | LightGBM      | LightGBM is faster than XGBoost. And the accuracy in this project is higher than XGBoost. It has low memory usage.          |
 | CatBoost      | Designed for categorical data.           |
 
-### Bayesian Optimization
 
 ### Others
 I also tried other interesting approaches: time analysis with prophet and uber ludwig. I didn't post code for those two. But here are some introduction for people who are interest.
@@ -32,11 +31,14 @@ Some people said the var_68 is date and can be decoded to dates from 2017-07-24 
 Ludwig is a toolbox that allows to train and test deep learning models without the need to write code (https://uber.github.io/ludwig/). Since it got 0.75 accuracy in Kaggle's Titanic: Predicting survivors, I did not put too much time on this.
 
 ## Generate New Features 
-Aim to multiply features. 
+Aim to multiply features to get better cv/lb score.
 
 ## Select Model
-| Algorithm Name | Cross-Validation Score | Leaderboard Score| Running time |
-| ------------- | ----------------------  |----------------- |------------- |
-| XGBoost       | Content Cell            |Content Cell      |Content Cell  |
-| LightGBM      | Content Cell            |Content Cell      |Content Cell  |
-| CatBoost      | Content Cell            |Content Cell      |Content Cell  |
+| Algorithm Name | Cross-Validation Score | Leaderboard Score| 
+| ------------- | ----------------------  |----------------- |
+| XGBoost       | 0.897            |0.899      |
+| LightGBM      | 0.901             |0.901      |
+| CatBoost      |    0.899         |0.898      |
+
+## Result
+I got a Bronze medal (top 10% from 9k teams).

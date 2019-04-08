@@ -1,0 +1,133 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(catboost)
+library(caret)
+library(data.table)
+library(caTools)
+library(MLmetrics)
+```
+```{r}
+# set seed for reproducibility.
+set.seed(56498323)
+
+# avoid using scientific notation when printing.
+options(scipen=999)
+
+#---------------------------
+cat("Loading data...\n")
+
+#Read the input data
+train <- fread("train.csv")
+test <- fread("test.csv")
+
+folds <- createFolds(train$target, k=5, list=TRUE, returnTrain=FALSE)
+
+trainremoveCols <- c('target','ID_code')
+testremoveCols <- c('ID_code')
+
+target <- train$target
+testids <- test$ID_code
+
+train[,(trainremoveCols) := NULL]
+test[,(testremoveCols) := NULL]
+
+ncols <- ncol(train)
+ids <- 1:nrow(train)
+
+Auc <-  vector(mode="numeric",  length=4)
+predList <- vector(mode="list", length=4)
+
+targetList <- vector(mode="list", length=1)
+
+test_pool  <- catboost.load_pool(as.matrix(test))
+```
+
+```{r}
+cat("Training model...\n")
+
+for(fld in 1:length(folds))
+{
+ 
+controlID <- ids[folds[[fld]]]
+
+train_pool    <- catboost.load_pool(as.matrix(train[folds[[fld]]*-1,]), label = as.matrix(target[folds[[fld]]*-1]))
+control_pool  <- catboost.load_pool(as.matrix(train[folds[[fld]],]),  label = as.matrix(target[folds[[fld]]]))
+
+fit_params <- list(iterations = 7500,
+                   thread_count = 4,
+                   loss_function = 'Logloss',
+                   eval_metric = 'AUC',
+		           random_seed = 56498323,
+                   depth = 2, #default 6
+                   learning_rate = 0.04,
+                   l2_leaf_reg = 2, #default 3
+		           verbose = 1,
+		           use_best_model=TRUE,
+                   od_type = 'Iter',
+                   od_wait = 250,
+		           nan_mode = "Min",
+                   logging_level = 'Silent',
+                   train_dir = 'train_dir')
+                   
+model <- catboost.train(train_pool, control_pool, fit_params)
+pred_control_cat   <- catboost.predict(model, control_pool, prediction_type ="Probability", thread_count=4)
+predList[[fld]] <- catboost.predict(model, test_pool, prediction_type ="Probability", thread_count=4)
+
+if (fld > 1)
+{
+    trainstack <- rbind(trainstack, data.frame(ids = controlID, target=pred_control_cat))
+}
+else
+{
+    trainstack <- data.frame(ids = controlID, target=pred_control_cat)
+}
+
+varInf <- catboost.get_feature_importance(model, train_pool)
+fp <- data.table(Feature = names(train), score = varInf)
+fp <- fp[order(fp$score, decreasing =T),]
+
+if(fld >1)
+{
+afp <- rbindlist(list(afp, fp))[, lapply(.SD, sum, na.rm = TRUE), by = Feature ]
+}
+else
+{
+    afp <- fp
+}
+#print(head(fp,30))
+
+Auc[fld] <- as.double(colAUC(pred_control_cat,target[folds[[fld]]]))
+
+cat("Fold: ", fld,  " AUC: " , Auc[fld], "\n")
+}
+```
+
+```{r}
+fPred <- as.data.frame(t(do.call(rbind, predList)))
+targetList[[1]] <-  apply(fPred, 1, mean)
+
+trainstack <- trainstack[order(trainstack$ids, decreasing=F),]
+trainstack$ids <- NULL
+trainstack <- trainstack$target
+cat("OOF AUC: " , as.double(colAUC(trainstack,target), "\n"))
+
+stack <- c(trainstack,targetList[[1]])
+write.csv(stack, file="catstack.csv", quote=F,row.names=F)
+
+ans <- data.frame(ID_code = testids, target=tail(stack, nrow(test)))
+write.csv(ans, file="cat_baseline.csv", quote=F, row.names=F)
+
+cat("Auc list", Auc, "\n")
+cat("Mean Auc: ", mean(Auc), "\n")
+cat("SD of Auc:", sd(Auc), "\n")
+```
+
+
